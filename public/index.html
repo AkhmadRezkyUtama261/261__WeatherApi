@@ -1,0 +1,45 @@
+<DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset=""UTF-8>
+        <meta name="viewport" content="width=device-width, initial scales=1.
+        0">
+        <tittle>Geolocation<</tittle>
+    </head>
+
+<body>
+
+    <h3>Nama : Akhmad Rezky Utama </h3>
+    <h3>NIM : 20240140261 </h3>
+
+    <p>
+        Kota :
+        <span id="lokasi"></span>
+    </p>
+
+    <hr>
+
+    <p>
+        Koordinat :
+        <span id="negara"></span>
+    </p>
+
+    <script>
+
+        fetch("/api/lokasi")
+        .then(response => response.json())
+        .then(data => {
+
+            console.log(data);
+
+            document.getElementByid("lokasi").innerHTML = data.kota;
+
+            document.getElementByid("negara").innerHTML = data.koordinat;
+
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    </script>
+</body>
+</html>
