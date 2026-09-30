@@ -1,6 +1,6 @@
 const express = require("express");
 const axios = require("axios");
-const express = require("path");
+const path = require("path");
 
 const app = express();
 const PORT = 3000;
@@ -12,7 +12,7 @@ app.get("/api/lokasi", async (req, res) => {
 
     const apiKey = "TmW3n2IBOKaZxkghOoYB";
 
-    const url = 'https://api.maptiler.com/geocoding/${kota}.json?key=${apiKey}';
+    const url = `https://api.maptiler.com/geocoding/${kota}.json?key=${apiKey}`;
 
     try {
         const response = await axios.get(url);
@@ -28,7 +28,6 @@ app.get("/api/lokasi", async (req, res) => {
     }
     catch (error) {
         console.error(error.message);
-
         res.status(500).json({
             message: "Gagal mengambil data dari Maptiler"
         });
@@ -36,6 +35,6 @@ app.get("/api/lokasi", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log('server berjalan di http://localhost:${PORT}');
+    console.log(`server berjalan di http://localhost:${PORT}`);
 });
 
