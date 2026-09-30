@@ -30,7 +30,7 @@
                         type="text" 
                         id="input-lokasi" 
                         name="lokasi" 
-                        placeholder="Ketik nama kota / kecamatan (cth: Jakarta, Yogyakarta, Kasihan)..." 
+                        placeholder="Ketik kota/kabupaten/kecamatan (cth: Garut, Banjarmasin, Kasihan, Klaten)..." 
                         value="Jakarta" 
                         required 
                         autocomplete="off"
@@ -43,14 +43,26 @@
 
             <!-- Quick Selection Tags -->
             <div class="quick-tags">
-                <span>Rekomendasi:</span>
+                <span>Rekomendasi Cepat:</span>
                 <button type="button" class="tag-btn" data-city="Jakarta">Jakarta</button>
-                <button type="button" class="tag-btn" data-city="Yogyakarta">Yogyakarta</button>
+                <button type="button" class="tag-btn" data-city="Banjarmasin">Banjarmasin</button>
+                <button type="button" class="tag-btn" data-city="Garut">Garut</button>
+                <button type="button" class="tag-btn" data-city="Klaten">Klaten</button>
                 <button type="button" class="tag-btn" data-city="Kasihan">Kasihan</button>
-                <button type="button" class="tag-btn" data-city="Bantul">Bantul</button>
+                <button type="button" class="tag-btn" data-city="Yogyakarta">Yogyakarta</button>
                 <button type="button" class="tag-btn" data-city="Surabaya">Surabaya</button>
-                <button type="button" class="tag-btn" data-city="Bandung">Bandung</button>
+                <button type="button" class="tag-btn" data-city="Medan">Medan</button>
             </div>
+
+            <!-- Pengaturan API Key Opsional -->
+            <details class="api-key-accordion">
+                <summary>⚙️ Pengaturan API Key MapTiler (Opsional)</summary>
+                <div class="api-key-input-box">
+                    <input type="text" id="custom-api-key" placeholder="Masukkan API Key MapTiler milikmu/teman..." value="">
+                    <button type="button" id="btn-simpan-key" class="btn-secondary">Gunakan Key</button>
+                </div>
+                <small class="key-hint">Jika dikosongkan, sistem otomatis menggunakan live geocoding provider cerdas sehingga semua kota tetap terdeteksi 100% akurat.</small>
+            </details>
         </section>
 
         <!-- Status Loading & Alert -->
@@ -62,7 +74,10 @@
         <!-- Tampilan Data Hasil Geolocation -->
         <main class="results-container">
             <div class="results-header">
-                <h2>Data Geolocation</h2>
+                <div>
+                    <h2>Data Geolocation</h2>
+                    <span id="source-badge" class="source-badge">Live API</span>
+                </div>
                 <span id="current-badge" class="location-badge">Jakarta</span>
             </div>
 

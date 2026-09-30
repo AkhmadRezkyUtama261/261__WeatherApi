@@ -8,83 +8,15 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 
-// Fallback data lokasi Indonesia jika API key MapTiler mencapai kuota atau invalid
-const fallbackData = {
-    "jakarta": {
-        lokasi: "Jakarta",
-        negara: "Indonesia",
-        provinsi: "DKI Jakarta",
-        kecamatan: "Gambir",
-        longitude: 106.827153,
-        latitude: -6.175392
-    },
-    "yogyakarta": {
-        lokasi: "Yogyakarta",
-        negara: "Indonesia",
-        provinsi: "Daerah Istimewa Yogyakarta",
-        kecamatan: "Kraton",
-        longitude: 110.364444,
-        latitude: -7.801389
-    },
-    "kasihan": {
-        lokasi: "Kasihan",
-        negara: "Indonesia",
-        provinsi: "Daerah Istimewa Yogyakarta",
-        kecamatan: "Kasihan",
-        longitude: 110.334722,
-        latitude: -7.818333
-    },
-    "bantul": {
-        lokasi: "Bantul",
-        negara: "Indonesia",
-        provinsi: "Daerah Istimewa Yogyakarta",
-        kecamatan: "Bantul",
-        longitude: 110.328333,
-        latitude: -7.893889
-    },
-    "sleman": {
-        lokasi: "Sleman",
-        negara: "Indonesia",
-        provinsi: "Daerah Istimewa Yogyakarta",
-        kecamatan: "Depok",
-        longitude: 110.383333,
-        latitude: -7.766667
-    },
-    "surabaya": {
-        lokasi: "Surabaya",
-        negara: "Indonesia",
-        provinsi: "Jawa Timur",
-        kecamatan: "Genteng",
-        longitude: 112.750833,
-        latitude: -7.257472
-    },
-    "bandung": {
-        lokasi: "Bandung",
-        negara: "Indonesia",
-        provinsi: "Jawa Barat",
-        kecamatan: "Sumur Bandung",
-        longitude: 107.609810,
-        latitude: -6.917464
-    },
-    "semarang": {
-        lokasi: "Semarang",
-        negara: "Indonesia",
-        provinsi: "Jawa Tengah",
-        kecamatan: "Semarang Tengah",
-        longitude: 110.420833,
-        latitude: -6.993056
-    }
-};
-
 // Endpoint API Geocoding
 app.get("/api/lokasi", async (req, res) => {
     const kota = (req.query.kota || req.query.q || req.query.lokasi || "jakarta").trim();
     const apiKey = req.query.key || process.env.MAPTILER_API_KEY || "TmW3n2IBOKaZxkghOoYB";
 
-    const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(kota)}.json?key=${apiKey}`;
-
+    // 1. Coba panggil MapTiler Geocoding API terlebih dahulu
     try {
-        const response = await axios.get(url, { timeout: 4000 });
+        const maptilerUrl = `https://api.maptiler.com/geocoding/${encodeURIComponent(kota)}.json?key=${apiKey}`;
+        const response = await axios.get(maptilerUrl, { timeout: 3500 });
         const features = response.data && response.data.features;
 
         if (features && features.length > 0) {
@@ -95,14 +27,16 @@ app.get("/api/lokasi", async (req, res) => {
             const negara = context.find(c => c.id && c.id.startsWith("country"))?.text || 
                            (first.place_type && first.place_type.includes("country") ? first.text : "Indonesia");
             
-            const provinsi = context.find(c => c.id && (c.id.startsWith("region") || c.id.startsWith("province")))?.text || 
+            const provinsi = context.find(c => c.id && (c.id.startsWith("region") || c.id.startsWith("province") || c.id.startsWith("state")))?.text || 
                              (first.place_type && first.place_type.includes("region") ? first.text : "-");
 
             const kecamatan = context.find(c => c.id && (c.id.startsWith("subdistrict") || c.id.startsWith("locality") || c.id.startsWith("district") || c.id.startsWith("municipality")))?.text || 
-                              (first.place_type && (first.place_type.includes("subdistrict") || first.place_type.includes("locality")) ? first.text : "-");
+                              (first.place_type && (first.place_type.includes("subdistrict") || first.place_type.includes("locality")) ? first.text : first.text || "-");
 
+            console.log(`[MapTiler API] Berhasil mendapatkan data untuk: "${kota}"`);
             return res.json({
                 status: "success",
+                source: "maptiler",
                 lokasi: first.text || kota,
                 negara: negara,
                 provinsi: provinsi,
@@ -111,29 +45,67 @@ app.get("/api/lokasi", async (req, res) => {
                 latitude: coordinates[1]
             });
         }
-    } catch (error) {
-        console.warn(`[MapTiler API] Status ${error.response ? error.response.status : error.message} - menggunakan fallback data untuk: "${kota}"`);
+    } catch (maptilerError) {
+        console.warn(`[MapTiler API] ${maptilerError.response ? `Status ${maptilerError.response.status}` : maptilerError.message} - Beralih ke live geocoding provider untuk: "${kota}"`);
     }
 
-    // Fallback data jika API MapTiler mengalami limit / 403
-    const keyNormalized = kota.toLowerCase();
-    const matched = fallbackData[keyNormalized] || {
+    // 2. Fallback cerdas: Live Geocoding Provider (OpenStreetMap Nominatim)
+    // Berjalan otomatis untuk mencari kota/kabupaten/kecamatan apapun di dunia secara akurat
+    try {
+        const liveUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(kota)}&format=json&addressdetails=1&limit=1`;
+        const liveRes = await axios.get(liveUrl, {
+            timeout: 5000,
+            headers: {
+                "User-Agent": "PWS-Geolocation-App/1.0 (akhmad.rezky.ft24@mail.umy.ac.id)"
+            }
+        });
+
+        if (liveRes.data && liveRes.data.length > 0) {
+            const f = liveRes.data[0];
+            const a = f.address || {};
+
+            const negara = a.country || "Indonesia";
+            
+            // Penentuan Provinsi
+            let provinsi = a.state || a.province || a.region;
+            if (!provinsi && a.city && a.city.toLowerCase().includes("jakarta")) {
+                provinsi = a.city;
+            } else if (!provinsi) {
+                provinsi = a.state_district || "-";
+            }
+
+            // Penentuan Kecamatan / Sub-wilayah
+            let kecamatan = a.subdistrict || a.city_district || a.suburb || a.town || a.municipality || a.village;
+            if (!kecamatan) {
+                kecamatan = a.city || a.county || f.name || "-";
+            }
+
+            console.log(`[Live Geocoding] Berhasil mendapatkan data untuk: "${kota}"`);
+            return res.json({
+                status: "success",
+                source: "geocoding-live",
+                lokasi: f.name || kota,
+                negara: negara,
+                provinsi: provinsi,
+                kecamatan: kecamatan,
+                longitude: parseFloat(f.lon),
+                latitude: parseFloat(f.lat)
+            });
+        }
+    } catch (liveError) {
+        console.warn(`[Live Geocoding Error] ${liveError.message}`);
+    }
+
+    // 3. Fallback jika offline / tidak ditemukan
+    return res.json({
+        status: "success",
+        source: "fallback",
         lokasi: kota.charAt(0).toUpperCase() + kota.slice(1),
         negara: "Indonesia",
-        provinsi: "D.I. Yogyakarta",
+        provinsi: "Daerah Istimewa Yogyakarta",
         kecamatan: kota.charAt(0).toUpperCase() + kota.slice(1),
         longitude: 110.364444,
         latitude: -7.801389
-    };
-
-    return res.json({
-        status: "success",
-        lokasi: matched.lokasi,
-        negara: matched.negara,
-        provinsi: matched.provinsi,
-        kecamatan: matched.kecamatan,
-        longitude: matched.longitude,
-        latitude: matched.latitude
     });
 });
 

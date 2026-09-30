@@ -388,3 +388,77 @@ body::after {
         grid-template-columns: 1fr;
     }
 }
+
+/* API Key Accordion */
+.api-key-accordion {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #cbd5e1;
+    font-size: 0.9rem;
+}
+
+.api-key-accordion summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-muted);
+    outline: none;
+    transition: var(--transition);
+}
+
+.api-key-accordion summary:hover {
+    color: var(--primary);
+}
+
+.api-key-input-box {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.api-key-input-box input {
+    flex: 1;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    outline: none;
+}
+
+.api-key-input-box input:focus {
+    border-color: var(--primary);
+}
+
+.btn-secondary {
+    padding: 0.5rem 1rem;
+    background: #e2e8f0;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #334155;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-secondary:hover {
+    background: #cbd5e1;
+}
+
+.key-hint {
+    display: block;
+    margin-top: 0.4rem;
+    color: #94a3b8;
+    font-size: 0.78rem;
+}
+
+.source-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #64748b;
+    margin-top: 0.25rem;
+}
