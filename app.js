@@ -1,0 +1,41 @@
+const express = require("express");
+const axios = require("axios");
+const express = require("path");
+
+const app = express();
+const PORT = 3000;
+
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/api/lokasi", async (req, res) => {
+    const kota = "jakarta";
+
+    const apiKey = "TmW3n2IBOKaZxkghOoYB";
+
+    const url = 'https://api.maptiler.com/geocoding/${kota}.json?key=${apiKey}';
+
+    try {
+        const response = await axios.get(url);
+        console.log(response.data);
+
+        const lokasi = data.feature[0].matching_text;
+        const koordinat = data.features[0].geometry.coordinates;
+
+        res.json({
+            kota: lokasi,
+            koordinat: koordinat
+        });
+    }
+    catch (error) {
+        console.error(error.message);
+
+        res.status(500).json({
+            message: "Gagal mengambil data dari Maptiler"
+        });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log('server berjalan di http://localhost:${PORT}');
+});
+
