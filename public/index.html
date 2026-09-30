@@ -1,45 +1,125 @@
-<DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset=""UTF-8>
-        <meta name="viewport" content="width=device-width, initial scales=1.
-        0">
-        <tittle>Geolocation<</tittle>
-    </head>
-
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Geolocation & WeatherAPI - PWS Pertemuan 3</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
 <body>
+    <div class="main-container">
+        <!-- Header Identitas Mahasiswa -->
+        <header class="header-card">
+            <div class="badge">Praktikum Web Service - Pertemuan 3</div>
+            <h1>Geolocation & WeatherAPI Explorer</h1>
+            <div class="student-info">
+                <p><strong>Nama :</strong> <span class="highlight">Akhmad Rezky Utama</span></p>
+                <p><strong>NIM :</strong> <span class="highlight">20240140261</span></p>
+            </div>
+        </header>
 
-    <h3>Nama : Akhmad Rezky Utama </h3>
-    <h3>NIM : 20240140261 </h3>
+        <!-- Form Pencarian Lokasi -->
+        <section class="search-section">
+            <form id="form-lokasi" class="search-box">
+                <div class="input-group">
+                    <label for="input-lokasi">Lokasi :</label>
+                    <input 
+                        type="text" 
+                        id="input-lokasi" 
+                        name="lokasi" 
+                        placeholder="Ketik nama kota / kecamatan (cth: Jakarta, Yogyakarta, Kasihan)..." 
+                        value="Jakarta" 
+                        required 
+                        autocomplete="off"
+                    >
+                </div>
+                <button type="submit" id="btn-cari" class="btn-primary">
+                    <span class="btn-text">Cari Lokasi</span>
+                </button>
+            </form>
 
-    <p>
-        Kota :
-        <span id="lokasi"></span>
-    </p>
+            <!-- Quick Selection Tags -->
+            <div class="quick-tags">
+                <span>Rekomendasi:</span>
+                <button type="button" class="tag-btn" data-city="Jakarta">Jakarta</button>
+                <button type="button" class="tag-btn" data-city="Yogyakarta">Yogyakarta</button>
+                <button type="button" class="tag-btn" data-city="Kasihan">Kasihan</button>
+                <button type="button" class="tag-btn" data-city="Bantul">Bantul</button>
+                <button type="button" class="tag-btn" data-city="Surabaya">Surabaya</button>
+                <button type="button" class="tag-btn" data-city="Bandung">Bandung</button>
+            </div>
+        </section>
 
-    <hr>
+        <!-- Status Loading & Alert -->
+        <div id="status-container" class="status-container hidden">
+            <div class="spinner"></div>
+            <span id="status-text">Mengambil data dari API...</span>
+        </div>
 
-    <p>
-        Koordinat :
-        <span id="negara"></span>
-    </p>
+        <!-- Tampilan Data Hasil Geolocation -->
+        <main class="results-container">
+            <div class="results-header">
+                <h2>Data Geolocation</h2>
+                <span id="current-badge" class="location-badge">Jakarta</span>
+            </div>
 
-    <script>
+            <div class="cards-grid">
+                <!-- Negara -->
+                <div class="info-card">
+                    <div class="card-icon">🇮🇩</div>
+                    <div class="card-content">
+                        <span class="label">Negara</span>
+                        <h3 id="hasil-negara">-</h3>
+                    </div>
+                </div>
 
-        fetch("/api/lokasi")
-        .then(response => response.json())
-        .then(data => {
+                <!-- Provinsi -->
+                <div class="info-card">
+                    <div class="card-icon">🏛️</div>
+                    <div class="card-content">
+                        <span class="label">Provinsi</span>
+                        <h3 id="hasil-provinsi">-</h3>
+                    </div>
+                </div>
 
-            console.log(data);
+                <!-- Kecamatan -->
+                <div class="info-card">
+                    <div class="card-icon">🏘️</div>
+                    <div class="card-content">
+                        <span class="label">Kecamatan</span>
+                        <h3 id="hasil-kecamatan">-</h3>
+                    </div>
+                </div>
 
-            document.getElementByid("lokasi").innerHTML = data.kota;
+                <!-- Longitude -->
+                <div class="info-card coordinate-card">
+                    <div class="card-icon">🧭</div>
+                    <div class="card-content">
+                        <span class="label">Longitude</span>
+                        <h3 id="hasil-longitude">-</h3>
+                    </div>
+                </div>
 
-            document.getElementByid("negara").innerHTML = data.koordinat;
+                <!-- Latitude -->
+                <div class="info-card coordinate-card">
+                    <div class="card-icon">🌐</div>
+                    <div class="card-content">
+                        <span class="label">Latitude</span>
+                        <h3 id="hasil-latitude">-</h3>
+                    </div>
+                </div>
+            </div>
+        </main>
 
-        })
-        .catch(error => {
-            console.error(error);
-        });
-    </script>
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Praktikum Web Service &copy; 2026 - Universitas Muhammadiyah Yogyakarta</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
